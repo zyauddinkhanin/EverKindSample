@@ -1,0 +1,186 @@
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  SafeAreaView,
+  Image,
+  Platform,
+  KeyboardAvoidingView,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Feather } from "@expo/vector-icons";
+import {
+  useSharedValue,
+  withTiming,
+  withSequence,
+  Easing,
+} from "react-native-reanimated";
+import { COLORS } from "./src/constants/Colors";
+import { JournalItem } from "./src/types";
+import JournalCard from "./src/components/JournalCard";
+import JournalInput from "./src/components/JournalInput";
+
+const initialJournalData: JournalItem[] = [
+  { type: "title", text: "Selling wife’s car" },
+  { type: "user", text: "I sold my wife’s car today" },
+  {
+    type: "ai",
+    text: "What led you to make this decision? How are you feeling about selling it?",
+  },
+  {
+    type: "user",
+    text: "It feels great, we found a sweet deal and ended up getting a new car right away",
+  },
+  {
+    type: "ai",
+    text: "Sounds like you both are feeling positive about the car change. What makes the new car special to your wife?",
+  },
+  {
+    type: "user",
+    text: "We are excited about the new safety features, she is an anxious driver so this encourages her to drive more and be free.",
+  },
+];
+
+const randomReplies = [
+  "That sounds like a significant moment! How did that make you feel?",
+  "What a great day! Can you tell me more about what inspired that?",
+  "That’s an interesting detail. Is there anything else about that experience you’d like to explore?",
+  "It sounds like you handled that well. What did you learn from that situation?",
+  "I see. What is the next thing you plan to do related to this?",
+];
+
+const emptyJournalData: JournalItem[] = [
+  { type: "ai", text: "Keep the streak 🚀" },
+  {
+    type: "user",
+    text: "You can start as many journals you want, EverKind will let you know when they’re ready to be saved.",
+  },
+];
+
+const Header = () => (
+  <View style={styles.header}>
+    <Feather name="menu" size={24} color={COLORS.textPrimary} />
+    <Text style={styles.headerTitle}>EverKind</Text>
+    <Image
+      source={{
+        uri: "https://i.imgur.com/8N4N5R8.png",
+      }}
+      style={styles.profileImage}
+    />
+  </View>
+);
+
+const App = () => {
+  const [journalData, setJournalData] =
+    useState<JournalItem[]>(initialJournalData);
+  const cardScale = useSharedValue(1);
+  const [inputText, setInputText] = useState<string>("");
+  const [isTyping, setIsTyping] = useState<boolean>(false);
+
+  const [chatKey, setChatKey] = useState<number>(0);
+  const cardTranslateX = useSharedValue(0);
+
+  const handleSaveJournal = () => {
+    cardTranslateX.value = withSequence(
+      withTiming(-50, { duration: 200 }),
+      withTiming(-500, { duration: 300, easing: Easing.in(Easing.ease) })
+    );
+
+    setTimeout(() => {
+      setJournalData(emptyJournalData);
+      cardTranslateX.value = 500;
+      cardTranslateX.value = withTiming(0, {
+        duration: 350,
+        easing: Easing.out(Easing.ease),
+      });
+    }, 550);
+
+    setTimeout(() => {
+      setChatKey((prevKey) => prevKey + 1);
+    }, 2000);
+  };
+
+  const handleSendMessage = () => {
+    if (!inputText.trim()) return;
+
+    const userMessage: JournalItem = { type: "user", text: inputText.trim() };
+
+    setJournalData((prev) => [...prev, userMessage]);
+    setInputText("");
+    setIsTyping(true);
+
+    const thinkingTime = Math.random() * 800 + 400;
+
+    setTimeout(() => {
+      const randomIndex = Math.floor(Math.random() * randomReplies.length);
+      const aiReply: JournalItem = {
+        type: "ai",
+        text: randomReplies[randomIndex],
+      };
+      setIsTyping(false);
+      setJournalData((prev) => [...prev, aiReply]);
+    }, thinkingTime);
+  };
+
+  return (
+    <LinearGradient
+      colors={[COLORS.backgroundStart, COLORS.backgroundEnd]}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
+      style={styles.fullScreenBackground}
+    >
+      <SafeAreaView style={styles.container}>
+        <Header />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.fullScreenBackground}
+        >
+          <JournalCard
+            key={chatKey}
+            data={journalData}
+            onSave={handleSaveJournal}
+            cardTranslateX={cardTranslateX.value}
+            isTyping={isTyping}
+          />
+          <JournalInput
+            currentText={inputText}
+            onTextChange={setInputText}
+            onSend={handleSendMessage}
+          />
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </LinearGradient>
+  );
+};
+
+const styles = StyleSheet.create({
+  fullScreenBackground: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+    paddingTop: Platform.OS === "android" ? 30 : 0,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: COLORS.headerColor,
+  },
+  profileImage: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "#fff",
+  },
+});
+
+export default App;
