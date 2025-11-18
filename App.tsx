@@ -18,11 +18,10 @@ import {
 } from "react-native-reanimated";
 import { COLORS } from "./src/constants/Colors";
 import { JournalItem } from "./src/types";
-import JournalCard from "./src/components/JournalCard";
+import JournalCard, { DatePill } from "./src/components/JournalCard";
 import JournalInput from "./src/components/JournalInput";
 
 const initialJournalData: JournalItem[] = [
-  { type: "title", text: "Selling wife’s car" },
   { type: "user", text: "I sold my wife’s car today" },
   {
     type: "ai",
@@ -35,10 +34,6 @@ const initialJournalData: JournalItem[] = [
   {
     type: "ai",
     text: "Sounds like you both are feeling positive about the car change. What makes the new car special to your wife?",
-  },
-  {
-    type: "user",
-    text: "We are excited about the new safety features, she is an anxious driver so this encourages her to drive more and be free.",
   },
 ];
 
@@ -81,24 +76,55 @@ const App = () => {
   const [chatKey, setChatKey] = useState<number>(0);
   const cardTranslateX = useSharedValue(0);
 
+  const [previousJournalData, setPreviousJournalData] = useState(null);
+  const [showPreviousCard, setShowPreviousCard] = useState(false);
+  const prevCardTranslateX = useSharedValue(500);
+
+  const Easing = require("react-native-reanimated").Easing;
+
   const handleSaveJournal = () => {
+    setPreviousJournalData(journalData);
     cardTranslateX.value = withSequence(
       withTiming(-50, { duration: 200 }),
       withTiming(-500, { duration: 300, easing: Easing.in(Easing.ease) })
     );
-
     setTimeout(() => {
       setJournalData(emptyJournalData);
       cardTranslateX.value = 500;
+      setShowPreviousCard(true);
       cardTranslateX.value = withTiming(0, {
         duration: 350,
         easing: Easing.out(Easing.ease),
       });
-    }, 550);
+      prevCardTranslateX.value = withTiming(0, {
+        duration: 350,
+        easing: Easing.out(Easing.ease),
+      });
+      setChatKey((prevKey) => prevKey + 1);
+    }, 450);
+  };
+
+  const handleGoBack = () => {
+    prevCardTranslateX.value = withTiming(500, {
+      duration: 350,
+      easing: Easing.in(Easing.ease),
+    });
+    cardTranslateX.value = withTiming(500, {
+      duration: 350,
+      easing: Easing.in(Easing.ease),
+    });
 
     setTimeout(() => {
-      setChatKey((prevKey) => prevKey + 1);
-    }, 2000);
+      setJournalData(previousJournalData);
+      setPreviousJournalData(null);
+      setShowPreviousCard(false);
+      prevCardTranslateX.value = 500;
+      cardTranslateX.value = -500;
+      cardTranslateX.value = withTiming(0, {
+        duration: 350,
+        easing: Easing.out(Easing.ease),
+      });
+    }, 350);
   };
 
   const handleSendMessage = () => {
@@ -110,7 +136,7 @@ const App = () => {
     setInputText("");
     setIsTyping(true);
 
-    const thinkingTime = Math.random() * 800 + 400;
+    const thinkingTime = Math.max(2000, Math.random() * 800 + 400);
 
     setTimeout(() => {
       const randomIndex = Math.floor(Math.random() * randomReplies.length);
@@ -125,9 +151,14 @@ const App = () => {
 
   return (
     <LinearGradient
-      colors={[COLORS.backgroundStart, COLORS.backgroundEnd]}
-      start={{ x: 0.5, y: 0 }}
-      end={{ x: 0.5, y: 1 }}
+      colors={[
+        COLORS.backgroundStart,
+        COLORS.bubbleGradientStart,
+        COLORS.bubbleGradientEnd,
+      ]}
+      start={{ x: 1, y: 0 }}
+      end={{ x: 0, y: 1 }}
+      locations={[0, 1, 1]}
       style={styles.fullScreenBackground}
     >
       <SafeAreaView style={styles.container}>
@@ -140,9 +171,13 @@ const App = () => {
             key={chatKey}
             data={journalData}
             onSave={handleSaveJournal}
-            cardTranslateX={cardTranslateX.value}
+            cardTranslateX={cardTranslateX}
             isTyping={isTyping}
+            title={"Selling wife’s car"}
+            isShowBack={showPreviousCard}
+            goBack={handleGoBack}
           />
+          <DatePill date="Nov 2nd 2025" />
           <JournalInput
             currentText={inputText}
             onTextChange={setInputText}
@@ -171,8 +206,8 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: "bold",
-    color: COLORS.headerColor,
+    fontWeight: "400",
+    color: COLORS.textPrimary,
   },
   profileImage: {
     width: 36,

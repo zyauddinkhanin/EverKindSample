@@ -1,3 +1,5 @@
+import { SharedValue } from "react-native-reanimated";
+
 export type JournalItem = {
   type: "title" | "user" | "ai";
   text: string;
@@ -12,8 +14,11 @@ export interface ChatBubbleProps {
 export interface JournalCardProps {
   data: JournalItem[];
   onSave: () => void;
-  cardTranslateX: number;
+  cardTranslateX: SharedValue<number>;
   isTyping: boolean;
+  title?: string;
+  isShowBack?: boolean;
+  goBack: () => void;
 }
 
 export interface JournalInputProps {

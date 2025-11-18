@@ -11,30 +11,34 @@ const JournalInput = ({
 }: JournalInputProps) => {
   return (
     <View style={styles.journalInputContainer}>
-      <Ionicons
-        name="camera-outline"
-        size={24}
-        color={COLORS.textSecondary}
-        style={styles.inputIcon}
-      />
-      <TextInput
-        style={styles.journalInput}
-        placeholder="What did you do today?"
-        placeholderTextColor={COLORS.textSecondary}
-        value={currentText}
-        onChangeText={onTextChange}
-        returnKeyType="send"
-        onSubmitEditing={onSend}
-      />
-
-      <Pressable onPress={onSend}>
-        <MaterialCommunityIcons
-          name={currentText.trim() ? "send" : "microphone"}
+      <View style={styles.journalInnerContainer}>
+        <Ionicons
+          name="camera-outline"
           size={24}
-          color={currentText.trim() ? COLORS.headerColor : COLORS.textSecondary}
+          color={COLORS.textSecondary}
           style={styles.inputIcon}
         />
-      </Pressable>
+        <TextInput
+          style={styles.journalInput}
+          placeholder="What did you do today?"
+          placeholderTextColor={COLORS.textSecondary}
+          value={currentText}
+          onChangeText={onTextChange}
+          returnKeyType="send"
+          onSubmitEditing={onSend}
+        />
+
+        <Pressable onPress={onSend}>
+          <MaterialCommunityIcons
+            name={currentText.trim() ? "arrow-up-circle-outline" : "microphone"}
+            size={24}
+            color={
+              currentText.trim() ? COLORS.headerColor : COLORS.textSecondary
+            }
+            style={styles.inputIcon}
+          />
+        </Pressable>
+      </View>
     </View>
   );
 };
@@ -44,10 +48,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginHorizontal: 15,
-    backgroundColor: "#ffffff",
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 30,
+    backgroundColor: "#f0e8f6",
+    padding: 12,
+    borderRadius: 50,
     marginBottom: 20,
     marginTop: 10,
     shadowColor: "#000",
@@ -55,6 +58,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
+  },
+  journalInnerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#eae3f1",
+    borderRadius: 50,
   },
   journalInput: {
     flex: 1,
@@ -64,6 +73,9 @@ const styles = StyleSheet.create({
   },
   inputIcon: {
     marginHorizontal: 5,
+    backgroundColor: "#e5e0e8",
+    padding: 5,
+    borderRadius: 30,
   },
 });
 

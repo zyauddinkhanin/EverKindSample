@@ -15,8 +15,8 @@ const AnimatedChatBubble = ({ text, isAI, delay }: ChatBubbleProps) => {
   const translateY = useSharedValue(30);
 
   useEffect(() => {
-    opacity.value = withDelay(delay, withTiming(1, { duration: 500 }));
-    translateY.value = withDelay(delay, withTiming(0, { duration: 500 }));
+    opacity.value = withDelay(delay, withTiming(1, { duration: 350 }));
+    translateY.value = withDelay(delay, withTiming(0, { duration: 350 }));
   }, [delay, opacity, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -26,28 +26,28 @@ const AnimatedChatBubble = ({ text, isAI, delay }: ChatBubbleProps) => {
     };
   });
 
-  const bubbleStyles = isAI ? styles.aiBubble : styles.userBubble;
-  const bubbleTextStyles = isAI ? styles.aiBubbleText : styles.userBubbleText;
-
-  const BubbleContent = (
-    <View style={[styles.chatBubble, bubbleStyles]}>
-      <Text style={bubbleTextStyles}>{text}</Text>
-    </View>
-  );
-
   return (
-    <Animated.View style={[styles.bubbleWrapper, animatedStyle]}>
+    <Animated.View
+      style={[
+        styles.bubbleWrapper,
+        animatedStyle,
+        isAI ? styles.aiWrapper : styles.userWrapper,
+      ]}
+    >
       {isAI ? (
         <LinearGradient
           colors={[COLORS.bubbleGradientStart, COLORS.bubbleGradientEnd]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+          start={{ x: 0, y: 1 }}
+          end={{ x: 1, y: 0 }}
+          locations={[0, 1, 1]}
           style={styles.gradientBubble}
         >
           <Text style={styles.aiBubbleText}>{text}</Text>
         </LinearGradient>
       ) : (
-        BubbleContent
+        <View style={styles.userBubbleContainer}>
+          <Text style={styles.userBubbleText}>{text}</Text>
+        </View>
       )}
     </Animated.View>
   );
@@ -57,32 +57,34 @@ const styles = StyleSheet.create({
   bubbleWrapper: {
     marginBottom: 15,
   },
-  chatBubble: {
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    maxWidth: "85%",
+  aiWrapper: {
+    alignItems: "flex-start",
   },
-  userBubble: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 0,
-    paddingVertical: 5,
+  userWrapper: {
+    alignItems: "flex-start",
+    alignSelf: "stretch",
   },
   gradientBubble: {
-    alignSelf: "flex-start",
     borderRadius: 25,
     paddingHorizontal: 18,
     paddingVertical: 12,
-  },
-  aiBubble: {},
-  userBubbleText: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: COLORS.textPrimary,
+    maxWidth: "100%",
   },
   aiBubbleText: {
     fontSize: 16,
     lineHeight: 24,
-    color: "white",
+    color: "#333",
+  },
+  userBubbleContainer: {
+    backgroundColor: COLORS.cardBackground,
+    paddingVertical: 8,
+    maxWidth: "100%",
+  },
+  userBubbleText: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: COLORS.textPrimary,
+    textAlign: "left",
   },
 });
 
