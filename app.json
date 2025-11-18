@@ -21,14 +21,14 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.zyauddinkhan.EverKindSample"
+      "package": "com.zyauddin_khan.EverKindSample"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "26a3922e-42f9-446f-86db-6b553657a6f2"
+        "projectId": "4a232566-fa82-4140-8c0d-fb25d738d13b"
       }
     }
   }
