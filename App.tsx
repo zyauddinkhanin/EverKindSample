@@ -20,6 +20,7 @@ import { JournalItem } from "./src/types";
 import JournalCard, { DatePill } from "./src/components/JournalCard";
 import JournalInput from "./src/components/JournalInput";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const initialJournalData: JournalItem[] = [
   { type: "user", text: "I sold my wife’s car today" },
@@ -84,10 +85,10 @@ const App = () => {
 
   const handleSaveJournal = () => {
     setPreviousJournalData(journalData);
-    cardTranslateX.value = withSequence(
-      withTiming(-50, { duration: 200 }),
-      withTiming(-500, { duration: 300, easing: Easing.in(Easing.ease) })
-    );
+    cardTranslateX.value = withTiming(-500, {
+      duration: 350,
+      easing: Easing.out(Easing.ease),
+    });
     setTimeout(() => {
       setJournalData(emptyJournalData);
       cardTranslateX.value = 500;
@@ -109,9 +110,10 @@ const App = () => {
       duration: 350,
       easing: Easing.in(Easing.ease),
     });
+
     cardTranslateX.value = withTiming(500, {
       duration: 350,
-      easing: Easing.in(Easing.ease),
+      easing: Easing.out(Easing.ease),
     });
 
     setTimeout(() => {
@@ -150,42 +152,44 @@ const App = () => {
   };
 
   return (
-    <LinearGradient
-      colors={[
-        COLORS.backgroundStart,
-        COLORS.bubbleGradientStart,
-        COLORS.bubbleGradientEnd,
-      ]}
-      start={{ x: 1, y: 0 }}
-      end={{ x: 0, y: 1 }}
-      locations={[0, 1, 1]}
-      style={styles.fullScreenBackground}
-    >
-      <SafeAreaView style={styles.container}>
-        <Header />
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.fullScreenBackground}
-        >
-          <JournalCard
-            key={chatKey}
-            data={journalData}
-            onSave={handleSaveJournal}
-            cardTranslateX={cardTranslateX}
-            isTyping={isTyping}
-            title={"Selling wife’s car"}
-            isShowBack={showPreviousCard}
-            goBack={handleGoBack}
-          />
-          <DatePill date="Nov 2nd 2025" />
-          <JournalInput
-            currentText={inputText}
-            onTextChange={setInputText}
-            onSend={handleSendMessage}
-          />
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </LinearGradient>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <LinearGradient
+        colors={[
+          COLORS.backgroundStart,
+          COLORS.bubbleGradientStart,
+          COLORS.bubbleGradientEnd,
+        ]}
+        start={{ x: 1, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        locations={[0, 1, 1]}
+        style={styles.fullScreenBackground}
+      >
+        <SafeAreaView style={styles.container}>
+          <Header />
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.fullScreenBackground}
+          >
+            <JournalCard
+              key={chatKey}
+              data={journalData}
+              onSave={handleSaveJournal}
+              cardTranslateX={cardTranslateX}
+              isTyping={isTyping}
+              title={"Selling wife’s car"}
+              isShowBack={showPreviousCard}
+              goBack={handleGoBack}
+            />
+            <DatePill date="Nov 2nd 2025" />
+            <JournalInput
+              currentText={inputText}
+              onTextChange={setInputText}
+              onSend={handleSendMessage}
+            />
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+      </LinearGradient>
+    </GestureHandlerRootView>
   );
 };
 

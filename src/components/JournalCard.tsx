@@ -13,7 +13,13 @@ import { JournalCardProps } from "../types";
 import AnimatedChatBubble from "./AnimatedChatBubble";
 import TypingIndicator from "./TypingIndicator";
 import { LinearGradient } from "expo-linear-gradient";
-import Animated, { useAnimatedStyle } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  runOnJS,
+} from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 export const SaveJournalButton: React.FC<{ onPress: () => void }> = ({
@@ -68,12 +74,34 @@ const JournalCard: React.FC<JournalCardProps> = ({
   isShowBack,
   goBack,
 }) => {
+  const SWIPE_THRESHOLD = 120;
+
+  const swipeGesture = Gesture.Pan()
+    .onUpdate((event) => {
+      cardTranslateX.value = event.translationX;
+    })
+    .onEnd((event) => {
+      if (event.translationX < -SWIPE_THRESHOLD) {
+        runOnJS(onSave)();
+      } else if (event.translationX > SWIPE_THRESHOLD && isShowBack) {
+        runOnJS(goBack)();
+      } else {
+        cardTranslateX.value = withTiming(0, { duration: 250 });
+      }
+    });
+
   const scrollRef = useRef<ScrollView>(null);
   const animatedStyle = useAnimatedStyle(() => {
+    const rotate = cardTranslateX.value / 30;
+
     return {
-      transform: [{ translateX: cardTranslateX.value }],
+      transform: [
+        { translateX: cardTranslateX.value },
+        { rotateZ: `${rotate}deg` },
+      ],
     };
   });
+
   React.useEffect(() => {
     scrollRef.current?.scrollTo({ y: 0, animated: true });
   }, [data, isTyping]);
@@ -121,24 +149,26 @@ const JournalCard: React.FC<JournalCardProps> = ({
 
   return (
     <View style={styles.cardWrapper}>
-      <Animated.View style={[styles.card, animatedStyle]}>
-        <LinearGradient
-          colors={[COLORS.cardGradientStart, COLORS.cardGradientEnd]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-          style={styles.cardContentGradient}
-        >
-          <Text style={styles.journalTitle}>{title}</Text>
-          <ScrollView
-            ref={scrollRef}
-            contentContainerStyle={styles.scrollContent}
-            style={[styles.scrollView, styles.invertedTransform]}
-            showsVerticalScrollIndicator={false}
+      <GestureDetector gesture={swipeGesture}>
+        <Animated.View style={[styles.card, animatedStyle]}>
+          <LinearGradient
+            colors={[COLORS.cardGradientStart, COLORS.cardGradientEnd]}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            style={styles.cardContentGradient}
           >
-            <View style={styles.contentTransform}>{renderContent()}</View>
-          </ScrollView>
-        </LinearGradient>
-      </Animated.View>
+            <Text style={styles.journalTitle}>{title}</Text>
+            <ScrollView
+              ref={scrollRef}
+              contentContainerStyle={styles.scrollContent}
+              style={[styles.scrollView, styles.invertedTransform]}
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.contentTransform}>{renderContent()}</View>
+            </ScrollView>
+          </LinearGradient>
+        </Animated.View>
+      </GestureDetector>
     </View>
   );
 };
