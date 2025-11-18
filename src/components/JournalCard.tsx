@@ -23,7 +23,7 @@ export const SaveJournalButton: React.FC<{ onPress: () => void }> = ({
     colors={[COLORS.bubbleGradientStart, COLORS.bubbleGradientEnd]}
     start={{ x: 0, y: 1 }}
     end={{ x: 1, y: 0 }}
-    locations={[0, 1, 1]}
+    locations={[0, 1]}
     style={styles.gradientButton}
   >
     <TouchableOpacity onPress={onPress} style={styles.saveButtonContainer}>

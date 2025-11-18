@@ -39,7 +39,7 @@ const AnimatedChatBubble = ({ text, isAI, delay }: ChatBubbleProps) => {
           colors={[COLORS.bubbleGradientStart, COLORS.bubbleGradientEnd]}
           start={{ x: 0, y: 1 }}
           end={{ x: 1, y: 0 }}
-          locations={[0, 1, 1]}
+          locations={[0, 1]}
           style={styles.gradientBubble}
         >
           <Text style={styles.aiBubbleText}>{text}</Text>

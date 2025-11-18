@@ -3,7 +3,6 @@ import {
   StyleSheet,
   View,
   Text,
-  SafeAreaView,
   Image,
   Platform,
   KeyboardAvoidingView,
@@ -20,6 +19,7 @@ import { COLORS } from "./src/constants/Colors";
 import { JournalItem } from "./src/types";
 import JournalCard, { DatePill } from "./src/components/JournalCard";
 import JournalInput from "./src/components/JournalInput";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const initialJournalData: JournalItem[] = [
   { type: "user", text: "I sold my wife’s car today" },
