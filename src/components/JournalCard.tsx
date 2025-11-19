@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Pressable,
+  ImageBackground,
 } from "react-native";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS } from "../constants/Colors";
@@ -21,27 +22,74 @@ import Animated, {
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import MaskedView from "@react-native-masked-view/masked-view";
+import ChatIcon from "../../assets/chatIcon";
 
 export const SaveJournalButton: React.FC<{ onPress: () => void }> = ({
   onPress,
 }) => (
   <LinearGradient
-    colors={[COLORS.bubbleGradientStart, COLORS.bubbleGradientEnd]}
-    start={{ x: 0, y: 1 }}
-    end={{ x: 1, y: 0 }}
-    locations={[0, 1]}
+    colors={[
+      COLORS.bubbleGradientStart,
+      COLORS.bubbleGradientMidStart,
+      COLORS.bubbleGradientMidEnd,
+      COLORS.bubbleGradientEnd,
+    ]}
+    start={{ x: 0.29, y: 0 }}
+    end={{ x: 0.78, y: 2.09 }}
+    locations={[0, 0.25, 0.56, 0.9]}
     style={styles.gradientButton}
   >
     <TouchableOpacity onPress={onPress} style={styles.saveButtonContainer}>
-      <Text style={styles.saveButtonText}>Save journal</Text>
-      <Feather name="check" size={18} color={COLORS.bubbleGradientEnd} />
+      <GradientText
+        colors={[
+          COLORS.bubbleGradientStart,
+          COLORS.bubbleGradientMidStart,
+          COLORS.bubbleGradientMidEnd,
+          COLORS.bubbleGradientEnd,
+        ]}
+      >
+        <Text style={styles.saveButtonText} allowFontScaling={false}>
+          Save journal{"  "}
+        </Text>
+        <Feather name="check" size={16} color={COLORS.bubbleGradientEnd} />
+      </GradientText>
     </TouchableOpacity>
   </LinearGradient>
 );
 
+const GradientText = ({ children, colors, ...rest }) => {
+  return (
+    <MaskedView
+      maskElement={
+        <Text allowFontScaling={false} {...rest}>
+          {children}
+        </Text>
+      }
+    >
+      <LinearGradient
+        colors={colors}
+        start={{ x: 0.29, y: 0 }}
+        end={{ x: 0.78, y: 2.09 }}
+        locations={[0, 0.25, 0.56, 0.9]}
+      >
+        <Text
+          allowFontScaling={false}
+          {...rest}
+          style={[rest.style, { opacity: 0 }]}
+        >
+          {children}
+        </Text>
+      </LinearGradient>
+    </MaskedView>
+  );
+};
+
 export const DatePill: React.FC<{ date: string }> = ({ date }) => (
   <View style={styles.datePillContainer}>
-    <Text style={styles.datePillText}>{date}</Text>
+    <Text style={styles.datePillText} allowFontScaling={false}>
+      {date}
+    </Text>
   </View>
 );
 
@@ -111,7 +159,11 @@ const JournalCard: React.FC<JournalCardProps> = ({
     data.forEach((item, index) => {
       if (item.type === "title") {
         content.push(
-          <Text key={index} style={styles.journalTitle}>
+          <Text
+            key={index}
+            style={styles.journalTitle}
+            allowFontScaling={false}
+          >
             {item.text}
           </Text>
         );
@@ -129,20 +181,22 @@ const JournalCard: React.FC<JournalCardProps> = ({
     if (isTyping) {
       content.push(<TypingIndicator key="typing-indicator" />);
     }
-    content.push(
-      <View
-        key="save-button"
-        style={{
-          alignItems: "center",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          marginTop: 15,
-        }}
-      >
-        {isShowBack ? <GoBackButton onPress={goBack} /> : <View />}
-        <SaveJournalButton onPress={onSave} />
-      </View>
-    );
+    if (data?.length > 0 || isShowBack) {
+      content.push(
+        <View
+          key="save-button"
+          style={{
+            alignItems: "center",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginTop: 15,
+          }}
+        >
+          {isShowBack ? <GoBackButton onPress={goBack} /> : <View />}
+          {data?.length > 0 ? <SaveJournalButton onPress={onSave} /> : <View />}
+        </View>
+      );
+    }
 
     return content;
   };
@@ -151,22 +205,65 @@ const JournalCard: React.FC<JournalCardProps> = ({
     <View style={styles.cardWrapper}>
       <GestureDetector gesture={swipeGesture}>
         <Animated.View style={[styles.card, animatedStyle]}>
-          <LinearGradient
-            colors={[COLORS.cardGradientStart, COLORS.cardGradientEnd]}
-            start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 1 }}
-            style={styles.cardContentGradient}
+          <ImageBackground
+            source={require("../../assets/bgImage.png")}
+            resizeMode="cover"
+            style={{ flex: 1 }}
+            imageStyle={{ opacity: 0.05 }}
           >
-            <Text style={styles.journalTitle}>{title}</Text>
-            <ScrollView
-              ref={scrollRef}
-              contentContainerStyle={styles.scrollContent}
-              style={[styles.scrollView, styles.invertedTransform]}
-              showsVerticalScrollIndicator={false}
-            >
-              <View style={styles.contentTransform}>{renderContent()}</View>
-            </ScrollView>
-          </LinearGradient>
+            {data?.length > 0 ? (
+              <Text style={styles.journalTitle} allowFontScaling={false}>
+                {title}
+              </Text>
+            ) : null}
+            {data?.length > 0 ? (
+              <ScrollView
+                ref={scrollRef}
+                contentContainerStyle={styles.scrollContent}
+                style={[styles.scrollView, styles.invertedTransform]}
+                showsVerticalScrollIndicator={false}
+              >
+                <View style={styles.contentTransform}>{renderContent()}</View>
+              </ScrollView>
+            ) : (
+              <View style={{ flex: 1 }}>
+                <View
+                  style={{
+                    flex: 1,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    paddingHorizontal: 50,
+                  }}
+                >
+                  <ChatIcon style={{ marginTop: 70, marginBottom: 15 }} />
+                  <Text style={styles.emptyTitle} allowFontScaling={false}>
+                    Keep the streak 🚀
+                  </Text>
+                  <Text style={styles.emptyDesc} allowFontScaling={false}>
+                    You can start as many journals you want, EverKind will let
+                    you know when they’re ready to be saved.
+                  </Text>
+                </View>
+                <View
+                  key="save-button"
+                  style={{
+                    alignItems: "center",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignSelf: "flex-start",
+                    padding: 15,
+                  }}
+                >
+                  {isShowBack ? <GoBackButton onPress={goBack} /> : <View />}
+                  {data?.length > 0 ? (
+                    <SaveJournalButton onPress={onSave} />
+                  ) : (
+                    <View />
+                  )}
+                </View>
+              </View>
+            )}
+          </ImageBackground>
         </Animated.View>
       </GestureDetector>
     </View>
@@ -207,7 +304,6 @@ const styles = StyleSheet.create({
     paddingVertical: 30,
     flexGrow: 1,
     justifyContent: "flex-start",
-    backgroundColor: "white",
   },
   datePillContainer: {
     alignSelf: "center",
@@ -222,29 +318,23 @@ const styles = StyleSheet.create({
     top: 5,
     zIndex: 99,
     elevation: 20,
-    transform: [{ rotate: "-5deg" }],
+    transform: [{ rotate: "-3deg" }],
   },
   datePillText: {
     fontSize: 14,
-    fontWeight: "600",
-    color: COLORS.textPrimary,
+    fontFamily: "SemiBold",
+    color: "#100212E5",
   },
   journalTitle: {
     fontSize: 16,
-    fontWeight: "500",
-    lineHeight: 24,
-    color: COLORS.textPrimary,
+    fontFamily: "Medium",
+    color: "#1C191C",
     paddingHorizontal: 20,
     paddingTop: 30,
     paddingBottom: 10,
   },
   gradientButton: {
     padding: 2,
-    shadowColor: COLORS.saveButton,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 25,
-    elevation: 5,
     height: 34,
     overflow: "hidden",
     borderRadius: 30,
@@ -259,8 +349,9 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     color: COLORS.bubbleGradientEnd,
-    fontSize: 14,
-    fontWeight: "bold",
+    fontSize: 12,
+    lineHeight: 16,
+    fontFamily: "Medium",
     marginRight: 5,
   },
   inputIcon: {
@@ -268,6 +359,21 @@ const styles = StyleSheet.create({
     backgroundColor: "#e5e0e8",
     padding: 5,
     borderRadius: 30,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontFamily: "Medium",
+    color: "#100212E5",
+    lineHeight: 24,
+    textAlign: "center",
+  },
+  emptyDesc: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#1002128C",
+    textAlign: "center",
+    fontFamily: "Regular",
+    marginTop: 10,
   },
 });
 

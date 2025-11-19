@@ -36,17 +36,26 @@ const AnimatedChatBubble = ({ text, isAI, delay }: ChatBubbleProps) => {
     >
       {isAI ? (
         <LinearGradient
-          colors={[COLORS.bubbleGradientStart, COLORS.bubbleGradientEnd]}
-          start={{ x: 0, y: 1 }}
-          end={{ x: 1, y: 0 }}
-          locations={[0, 1]}
+          colors={[
+            COLORS.bubbleGradientStart,
+            COLORS.bubbleGradientMidStart,
+            COLORS.bubbleGradientMidEnd,
+            COLORS.bubbleGradientEnd,
+          ]}
+          start={{ x: 0.29, y: 0 }}
+          end={{ x: 0.78, y: 2.09 }}
+          locations={[0, 0.25, 0.56, 0.9]}
           style={styles.gradientBubble}
         >
-          <Text style={styles.aiBubbleText}>{text}</Text>
+          <Text style={styles.aiBubbleText} allowFontScaling={false}>
+            {text}
+          </Text>
         </LinearGradient>
       ) : (
         <View style={styles.userBubbleContainer}>
-          <Text style={styles.userBubbleText}>{text}</Text>
+          <Text style={styles.userBubbleText} allowFontScaling={false}>
+            {text}
+          </Text>
         </View>
       )}
     </Animated.View>
@@ -69,22 +78,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 12,
     maxWidth: "100%",
+    shadowColor: "#100212E5",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 25,
+    elevation: 5,
   },
   aiBubbleText: {
-    fontSize: 16,
+    fontSize: 14,
     lineHeight: 24,
-    color: "#333",
+    color: "#100212E5",
+    fontFamily: "Regular",
   },
   userBubbleContainer: {
-    backgroundColor: COLORS.cardBackground,
     paddingVertical: 8,
     maxWidth: "100%",
   },
   userBubbleText: {
-    fontSize: 16,
+    fontSize: 14,
     lineHeight: 24,
-    color: COLORS.textPrimary,
+    color: "#100212E5",
     textAlign: "left",
+    fontFamily: "Regular",
   },
 });
 

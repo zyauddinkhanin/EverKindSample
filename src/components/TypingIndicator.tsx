@@ -50,9 +50,15 @@ const Dot: React.FC<{ delay: number }> = ({ delay }) => {
 const TypingIndicator: React.FC = () => {
   return (
     <LinearGradient
-      colors={[COLORS.bubbleGradientStart, COLORS.bubbleGradientEnd]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
+      colors={[
+        COLORS.bubbleGradientStart,
+        COLORS.bubbleGradientMidStart,
+        COLORS.bubbleGradientMidEnd,
+        COLORS.bubbleGradientEnd,
+      ]}
+      start={{ x: 0.29, y: 0 }}
+      end={{ x: 0.78, y: 2.09 }}
+      locations={[0, 0.25, 0.56, 0.9]}
       style={styles.typingBubble}
     >
       <View style={styles.dotContainer}>

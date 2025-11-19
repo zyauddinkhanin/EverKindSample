@@ -3,6 +3,7 @@ import { StyleSheet, View, TextInput, Pressable } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS } from "../constants/Colors";
 import { JournalInputProps } from "../types";
+import MicroPhoneIcon from "../../assets/microphone";
 
 const JournalInput = ({
   currentText,
@@ -21,7 +22,7 @@ const JournalInput = ({
         <TextInput
           style={styles.journalInput}
           placeholder="What did you do today?"
-          placeholderTextColor={COLORS.textSecondary}
+          placeholderTextColor={"#1002128C"}
           value={currentText}
           onChangeText={onTextChange}
           returnKeyType="send"
@@ -29,14 +30,18 @@ const JournalInput = ({
         />
 
         <Pressable onPress={onSend}>
-          <MaterialCommunityIcons
-            name={currentText.trim() ? "arrow-up-circle-outline" : "microphone"}
-            size={24}
-            color={
-              currentText.trim() ? COLORS.headerColor : COLORS.textSecondary
-            }
-            style={styles.inputIcon}
-          />
+          {currentText.trim()?.length > 0 ? (
+            <MaterialCommunityIcons
+              name="arrow-up-circle-outline"
+              size={24}
+              color={"#999"}
+              style={styles.inputIcon}
+            />
+          ) : (
+            <View style={styles.inputIcon}>
+              <MicroPhoneIcon />
+            </View>
+          )}
         </Pressable>
       </View>
     </View>
@@ -51,8 +56,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0e8f6",
     padding: 12,
     borderRadius: 50,
-    marginBottom: 20,
-    marginTop: 10,
+    marginBottom: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -67,13 +71,14 @@ const styles = StyleSheet.create({
   },
   journalInput: {
     flex: 1,
-    fontSize: 16,
-    color: COLORS.textPrimary,
+    fontSize: 14,
+    color: "#100212E5",
     paddingHorizontal: 10,
+    fontFamily: "Medium",
   },
   inputIcon: {
     marginHorizontal: 5,
-    backgroundColor: "#e5e0e8",
+    backgroundColor: "#1C191C0D",
     padding: 5,
     borderRadius: 30,
   },

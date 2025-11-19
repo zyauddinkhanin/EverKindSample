@@ -6,35 +6,25 @@ import {
   Image,
   Platform,
   KeyboardAvoidingView,
+  ImageBackground,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { Feather } from "@expo/vector-icons";
-import {
-  useSharedValue,
-  withTiming,
-  withSequence,
-  Easing,
-} from "react-native-reanimated";
-import { COLORS } from "./src/constants/Colors";
+import { Easing, useSharedValue, withTiming } from "react-native-reanimated";
 import { JournalItem } from "./src/types";
 import JournalCard, { DatePill } from "./src/components/JournalCard";
 import JournalInput from "./src/components/JournalInput";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import MenuIcon from "./assets/MenuIcon";
+import moment from "moment";
+import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
 
 const initialJournalData: JournalItem[] = [
   { type: "user", text: "I sold my wife’s car today" },
   {
     type: "ai",
     text: "What led you to make this decision? How are you feeling about selling it?",
-  },
-  {
-    type: "user",
-    text: "It feels great, we found a sweet deal and ended up getting a new car right away",
-  },
-  {
-    type: "ai",
-    text: "Sounds like you both are feeling positive about the car change. What makes the new car special to your wife?",
   },
 ];
 
@@ -46,18 +36,12 @@ const randomReplies = [
   "I see. What is the next thing you plan to do related to this?",
 ];
 
-const emptyJournalData: JournalItem[] = [
-  { type: "ai", text: "Keep the streak 🚀" },
-  {
-    type: "user",
-    text: "You can start as many journals you want, EverKind will let you know when they’re ready to be saved.",
-  },
-];
-
 const Header = () => (
   <View style={styles.header}>
-    <Feather name="menu" size={24} color={COLORS.textPrimary} />
-    <Text style={styles.headerTitle}>EverKind</Text>
+    <MenuIcon />
+    <Text style={styles.headerTitle} allowFontScaling={false}>
+      EverKind
+    </Text>
     <Image
       source={{
         uri: "https://i.imgur.com/8N4N5R8.png",
@@ -67,21 +51,39 @@ const Header = () => (
   </View>
 );
 
+SplashScreen.preventAutoHideAsync();
+
 const App = () => {
   const [journalData, setJournalData] =
     useState<JournalItem[]>(initialJournalData);
-  const cardScale = useSharedValue(1);
+  const [title, setTitle] = useState("I sold my wife’s car today");
   const [inputText, setInputText] = useState<string>("");
   const [isTyping, setIsTyping] = useState<boolean>(false);
+
+  const formattedDate = moment().format("MMM Do YYYY");
 
   const [chatKey, setChatKey] = useState<number>(0);
   const cardTranslateX = useSharedValue(0);
 
-  const [previousJournalData, setPreviousJournalData] = useState(null);
+  const [previousJournalData, setPreviousJournalData] = useState<JournalItem[]>(
+    []
+  );
   const [showPreviousCard, setShowPreviousCard] = useState(false);
   const prevCardTranslateX = useSharedValue(500);
 
-  const Easing = require("react-native-reanimated").Easing;
+  const [fontsLoaded] = useFonts({
+    Bold: require("./assets/fonts/InstrumentSans-Bold.ttf"),
+    Italic: require("./assets/fonts/InstrumentSans-Italic.ttf"),
+    Medium: require("./assets/fonts/InstrumentSans-Medium.ttf"),
+    Regular: require("./assets/fonts/InstrumentSans-Regular.ttf"),
+    SemiBold: require("./assets/fonts/InstrumentSans-SemiBold.ttf"),
+  });
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
 
   const handleSaveJournal = () => {
     setPreviousJournalData(journalData);
@@ -90,7 +92,8 @@ const App = () => {
       easing: Easing.out(Easing.ease),
     });
     setTimeout(() => {
-      setJournalData(emptyJournalData);
+      setJournalData([]);
+      setTitle("");
       cardTranslateX.value = 500;
       setShowPreviousCard(true);
       cardTranslateX.value = withTiming(0, {
@@ -118,7 +121,10 @@ const App = () => {
 
     setTimeout(() => {
       setJournalData(previousJournalData);
-      setPreviousJournalData(null);
+      setTitle(
+        previousJournalData?.length > 0 ? previousJournalData[0]?.text : ""
+      );
+      setPreviousJournalData([null]);
       setShowPreviousCard(false);
       prevCardTranslateX.value = 500;
       cardTranslateX.value = -500;
@@ -133,6 +139,10 @@ const App = () => {
     if (!inputText.trim()) return;
 
     const userMessage: JournalItem = { type: "user", text: inputText.trim() };
+
+    if (journalData?.length === 0) {
+      setTitle(inputText.trim());
+    }
 
     setJournalData((prev) => [...prev, userMessage]);
     setInputText("");
@@ -151,44 +161,45 @@ const App = () => {
     }, thinkingTime);
   };
 
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <LinearGradient
-        colors={[
-          COLORS.backgroundStart,
-          COLORS.bubbleGradientStart,
-          COLORS.bubbleGradientEnd,
-        ]}
-        start={{ x: 1, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        locations={[0, 1, 1]}
+    <GestureHandlerRootView style={styles.fullScreenBackground}>
+      <ImageBackground
+        source={require("./assets/gradient.png")}
         style={styles.fullScreenBackground}
       >
-        <SafeAreaView style={styles.container}>
-          <Header />
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={styles.fullScreenBackground}
-          >
-            <JournalCard
-              key={chatKey}
-              data={journalData}
-              onSave={handleSaveJournal}
-              cardTranslateX={cardTranslateX}
-              isTyping={isTyping}
-              title={"Selling wife’s car"}
-              isShowBack={showPreviousCard}
-              goBack={handleGoBack}
-            />
-            <DatePill date="Nov 2nd 2025" />
-            <JournalInput
-              currentText={inputText}
-              onTextChange={setInputText}
-              onSend={handleSendMessage}
-            />
-          </KeyboardAvoidingView>
-        </SafeAreaView>
-      </LinearGradient>
+        <SafeAreaProvider>
+          <SafeAreaView style={styles.container}>
+            <Header />
+            <KeyboardAvoidingView
+              behavior={Platform.OS === "ios" ? "padding" : "height"}
+              style={styles.fullScreenBackground}
+            >
+              <JournalCard
+                key={chatKey}
+                data={journalData}
+                onSave={handleSaveJournal}
+                cardTranslateX={cardTranslateX}
+                isTyping={isTyping}
+                title={title}
+                isShowBack={showPreviousCard}
+                goBack={handleGoBack}
+              />
+              {journalData?.length > 0 ? (
+                <DatePill date={formattedDate} />
+              ) : null}
+              <JournalInput
+                currentText={inputText}
+                onTextChange={setInputText}
+                onSend={handleSendMessage}
+              />
+            </KeyboardAvoidingView>
+          </SafeAreaView>
+        </SafeAreaProvider>
+      </ImageBackground>
     </GestureHandlerRootView>
   );
 };
@@ -210,8 +221,8 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: "400",
-    color: COLORS.textPrimary,
+    fontFamily: "Medium",
+    color: "#100212E5",
   },
   profileImage: {
     width: 36,
