@@ -9,11 +9,19 @@ import Animated, {
 } from "react-native-reanimated";
 import { COLORS } from "../constants/Colors";
 import { ChatBubbleProps } from "../types";
+import { useTyping } from "../context/TypingContext";
+import { useScroll } from "../context/ScrollContext";
 
-const AnimatedChatBubble = ({ text, isAI, delay }: ChatBubbleProps) => {
+const AnimatedChatBubble = ({ text, isAI, delay, id }: ChatBubbleProps) => {
+  const { streamed, markStreamed } = useTyping();
+  const messageId = id;
+  const { scrollToEndRef } = useScroll();
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(30);
-  const [displayed, setDisplayed] = useState(isAI ? "" : text);
+
+  const [displayed, setDisplayed] = useState(
+    isAI && !streamed[messageId] ? "" : text
+  );
 
   useEffect(() => {
     opacity.value = withDelay(delay, withTiming(1, { duration: 350 }));
@@ -22,26 +30,28 @@ const AnimatedChatBubble = ({ text, isAI, delay }: ChatBubbleProps) => {
 
   useEffect(() => {
     if (!isAI) return;
+    if (streamed[messageId]) return;
 
     let i = 0;
+
     const interval = setInterval(() => {
       if (i <= text.length) {
         setDisplayed(text.slice(0, i));
+        scrollToEndRef.current?.scrollToEnd({ animated: true });
         i++;
       } else {
         clearInterval(interval);
+        markStreamed(`${messageId}`);
       }
     }, 20);
 
     return () => clearInterval(interval);
   }, [text]);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: opacity.value,
-      transform: [{ translateY: translateY.value }],
-    };
-  });
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
 
   return (
     <Animated.View

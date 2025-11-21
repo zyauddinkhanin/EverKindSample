@@ -19,10 +19,14 @@ import moment from "moment";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import { TypingProvider } from "./src/context/TypingContext";
+import { generateKey } from "./src/utils";
+import { ScrollProvider } from "./src/context/ScrollContext";
 
 const initialJournalData: JournalItem[] = [
-  { type: "user", text: "I sold my wife’s car today" },
+  { id: generateKey(), type: "user", text: "I sold my wife’s car today" },
   {
+    id: generateKey(),
     type: "ai",
     text: "What led you to make this decision? How are you feeling about selling it?",
   },
@@ -138,7 +142,11 @@ const App = () => {
   const handleSendMessage = () => {
     if (!inputText.trim()) return;
 
-    const userMessage: JournalItem = { type: "user", text: inputText.trim() };
+    const userMessage: JournalItem = {
+      id: generateKey(),
+      type: "user",
+      text: inputText.trim(),
+    };
 
     if (journalData?.length === 0) {
       setTitle(inputText.trim());
@@ -153,6 +161,7 @@ const App = () => {
     setTimeout(() => {
       const randomIndex = Math.floor(Math.random() * randomReplies.length);
       const aiReply: JournalItem = {
+        id: generateKey(),
         type: "ai",
         text: randomReplies[randomIndex],
       };
@@ -166,38 +175,42 @@ const App = () => {
   }
 
   return (
-    <GestureHandlerRootView style={styles.fullScreenBackground}>
-      <ImageBackground
-        source={require("./assets/gradient.png")}
-        style={styles.fullScreenBackground}
-      >
-        <SafeAreaProvider>
-          <SafeAreaView style={styles.container}>
-            <Header />
-            <KeyboardAvoidingView
-              behavior={Platform.OS === "ios" ? "padding" : "height"}
-              style={styles.fullScreenBackground}
-            >
-              <JournalCard
-                key={chatKey}
-                data={journalData}
-                onSave={handleSaveJournal}
-                cardTranslateX={cardTranslateX}
-                isTyping={isTyping}
-                title={title}
-                isShowBack={showPreviousCard}
-                goBack={handleGoBack}
-              />
-              <JournalInput
-                currentText={inputText}
-                onTextChange={setInputText}
-                onSend={handleSendMessage}
-              />
-            </KeyboardAvoidingView>
-          </SafeAreaView>
-        </SafeAreaProvider>
-      </ImageBackground>
-    </GestureHandlerRootView>
+    <ScrollProvider>
+      <TypingProvider>
+        <GestureHandlerRootView style={styles.fullScreenBackground}>
+          <ImageBackground
+            source={require("./assets/gradient.png")}
+            style={styles.fullScreenBackground}
+          >
+            <SafeAreaProvider>
+              <SafeAreaView style={styles.container}>
+                <Header />
+                <KeyboardAvoidingView
+                  behavior={Platform.OS === "ios" ? "padding" : "height"}
+                  style={styles.fullScreenBackground}
+                >
+                  <JournalCard
+                    key={chatKey}
+                    data={journalData}
+                    onSave={handleSaveJournal}
+                    cardTranslateX={cardTranslateX}
+                    isTyping={isTyping}
+                    title={title}
+                    isShowBack={showPreviousCard}
+                    goBack={handleGoBack}
+                  />
+                  <JournalInput
+                    currentText={inputText}
+                    onTextChange={setInputText}
+                    onSend={handleSendMessage}
+                  />
+                </KeyboardAvoidingView>
+              </SafeAreaView>
+            </SafeAreaProvider>
+          </ImageBackground>
+        </GestureHandlerRootView>
+      </TypingProvider>
+    </ScrollProvider>
   );
 };
 

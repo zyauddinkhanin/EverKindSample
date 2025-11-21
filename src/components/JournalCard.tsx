@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   StyleSheet,
   View,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Pressable,
   ImageBackground,
+  Keyboard,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { COLORS } from "../constants/Colors";
@@ -24,6 +25,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import MaskedView from "@react-native-masked-view/masked-view";
 import ChatIcon from "../../assets/chatIcon";
 import moment from "moment";
+import { useScroll } from "../context/ScrollContext";
 
 export const SaveJournalButton: React.FC<{ onPress: () => void }> = ({
   onPress,
@@ -150,7 +152,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
     })
     .activeOffsetX([-20, 20])
     .failOffsetY([-5, 5]);
-
+  const { scrollToEndRef } = useScroll();
   const scrollRef = useRef<ScrollView>(null);
   const scrollParentRef = useRef<ScrollView>(null);
   const animatedStyle = useAnimatedStyle(() => {
@@ -164,10 +166,26 @@ const JournalCard: React.FC<JournalCardProps> = ({
     };
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     scrollRef.current?.scrollTo({ y: 0, animated: true });
     scrollParentRef.current?.scrollToEnd();
   }, [data, isTyping]);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", () => {
+      setTimeout(() => {
+        scrollToEndRef.current?.scrollToEnd({ animated: true });
+      }, 50);
+    });
+
+    return () => {
+      showSub.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    scrollToEndRef.current = scrollParentRef.current;
+  }, [scrollParentRef.current]);
 
   const renderContent = () => {
     const content = [];
@@ -185,6 +203,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
       } else {
         content.push(
           <AnimatedChatBubble
+            id={item.id}
             key={index}
             text={item.text}
             isAI={item.type === "ai"}

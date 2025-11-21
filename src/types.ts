@@ -3,11 +3,13 @@ import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { SharedValue } from "react-native-reanimated";
 
 export type JournalItem = {
+  id: string | number;
   type: "title" | "user" | "ai";
   text: string;
 };
 
 export interface ChatBubbleProps {
+  id: string | number;
   text: string;
   isAI: boolean;
   delay: number;
