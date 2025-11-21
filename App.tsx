@@ -168,7 +168,7 @@ const App = () => {
   return (
     <GestureHandlerRootView style={styles.fullScreenBackground}>
       <ImageBackground
-        source={require("./assets/Gradient.png")}
+        source={require("./assets/gradient.png")}
         style={styles.fullScreenBackground}
       >
         <SafeAreaProvider>

@@ -204,7 +204,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
       <GestureDetector gesture={swipeGesture}>
         <Animated.View style={[styles.card, animatedStyle]}>
           <ImageBackground
-            source={require("../../assets/BgImage.png")}
+            source={require("../../assets/bgImage.png")}
             resizeMode="cover"
             style={styles.cardContentGradient}
             imageStyle={{ opacity: 0.05 }}
