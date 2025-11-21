@@ -3,7 +3,7 @@ import { StyleSheet, View, TextInput, Pressable } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS } from "../constants/Colors";
 import { JournalInputProps } from "../types";
-import MicroPhoneIcon from "../../assets/microphone";
+import MicroPhoneIcon from "../../assets/MicrophoneIcon";
 
 const JournalInput = ({
   currentText,
@@ -54,14 +54,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginHorizontal: 15,
     backgroundColor: "#f0e8f6",
-    padding: 12,
-    borderRadius: 50,
+    padding: 16,
+    borderRadius: 40,
     marginBottom: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowColor: "#100212E5",
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 0.4,
     shadowRadius: 8,
-    elevation: 5,
+    elevation: 10,
   },
   journalInnerContainer: {
     flexDirection: "row",

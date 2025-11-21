@@ -8,22 +8,22 @@ import {
   Pressable,
   ImageBackground,
 } from "react-native";
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { COLORS } from "../constants/Colors";
-import { JournalCardProps } from "../types";
+import { GradientTextProps, JournalCardProps } from "../types";
 import AnimatedChatBubble from "./AnimatedChatBubble";
 import TypingIndicator from "./TypingIndicator";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
   useAnimatedStyle,
-  useSharedValue,
   withTiming,
   runOnJS,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaskedView from "@react-native-masked-view/masked-view";
-import ChatIcon from "../../assets/chatIcon";
+import ChatIcon from "../../assets/ChatIcon";
+import moment from "moment";
 
 export const SaveJournalButton: React.FC<{ onPress: () => void }> = ({
   onPress,
@@ -58,7 +58,7 @@ export const SaveJournalButton: React.FC<{ onPress: () => void }> = ({
   </LinearGradient>
 );
 
-const GradientText = ({ children, colors, ...rest }) => {
+const GradientText = ({ children, colors, ...rest }: GradientTextProps) => {
   return (
     <MaskedView
       maskElement={
@@ -112,7 +112,18 @@ export const GoBackButton: React.FC<{ onPress: () => void }> = ({
     </View>
   </Pressable>
 );
-
+export const BottomView: React.FC<JournalCardProps> = ({
+  data,
+  onSave,
+  isShowBack,
+  goBack,
+  style,
+}) => (
+  <View key="save-button" style={[styles.bottomViewStyle, style]}>
+    {isShowBack ? <GoBackButton onPress={goBack} /> : <View />}
+    {data?.length > 0 ? <SaveJournalButton onPress={onSave} /> : <View />}
+  </View>
+);
 const JournalCard: React.FC<JournalCardProps> = ({
   data,
   onSave,
@@ -123,7 +134,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
   goBack,
 }) => {
   const SWIPE_THRESHOLD = 120;
-
+  const formattedDate = moment().format("MMM Do YYYY");
   const swipeGesture = Gesture.Pan()
     .onUpdate((event) => {
       cardTranslateX.value = event.translationX;
@@ -136,9 +147,12 @@ const JournalCard: React.FC<JournalCardProps> = ({
       } else {
         cardTranslateX.value = withTiming(0, { duration: 250 });
       }
-    });
+    })
+    .activeOffsetX([-20, 20])
+    .failOffsetY([-5, 5]);
 
   const scrollRef = useRef<ScrollView>(null);
+  const scrollParentRef = useRef<ScrollView>(null);
   const animatedStyle = useAnimatedStyle(() => {
     const rotate = cardTranslateX.value / 30;
 
@@ -152,6 +166,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
 
   React.useEffect(() => {
     scrollRef.current?.scrollTo({ y: 0, animated: true });
+    scrollParentRef.current?.scrollToEnd();
   }, [data, isTyping]);
 
   const renderContent = () => {
@@ -181,23 +196,6 @@ const JournalCard: React.FC<JournalCardProps> = ({
     if (isTyping) {
       content.push(<TypingIndicator key="typing-indicator" />);
     }
-    if (data?.length > 0 || isShowBack) {
-      content.push(
-        <View
-          key="save-button"
-          style={{
-            alignItems: "center",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            marginTop: 15,
-          }}
-        >
-          {isShowBack ? <GoBackButton onPress={goBack} /> : <View />}
-          {data?.length > 0 ? <SaveJournalButton onPress={onSave} /> : <View />}
-        </View>
-      );
-    }
-
     return content;
   };
 
@@ -206,25 +204,52 @@ const JournalCard: React.FC<JournalCardProps> = ({
       <GestureDetector gesture={swipeGesture}>
         <Animated.View style={[styles.card, animatedStyle]}>
           <ImageBackground
-            source={require("../../assets/bgImage.png")}
+            source={require("../../assets/BgImage.png")}
             resizeMode="cover"
-            style={{ flex: 1 }}
+            style={styles.cardContentGradient}
             imageStyle={{ opacity: 0.05 }}
           >
             {data?.length > 0 ? (
-              <Text style={styles.journalTitle} allowFontScaling={false}>
-                {title}
-              </Text>
-            ) : null}
-            {data?.length > 0 ? (
-              <ScrollView
-                ref={scrollRef}
-                contentContainerStyle={styles.scrollContent}
-                style={[styles.scrollView, styles.invertedTransform]}
-                showsVerticalScrollIndicator={false}
-              >
-                <View style={styles.contentTransform}>{renderContent()}</View>
-              </ScrollView>
+              <View style={styles.cardContentGradient}>
+                <ScrollView
+                  ref={scrollParentRef}
+                  nestedScrollEnabled={true}
+                  style={styles.scrollView}
+                  contentContainerStyle={{ flexGrow: 1 }}
+                  showsVerticalScrollIndicator={false}
+                >
+                  {data?.length > 0 ? (
+                    <Text style={styles.journalTitle} allowFontScaling={false}>
+                      {title}
+                    </Text>
+                  ) : null}
+                  <ScrollView
+                    ref={scrollRef}
+                    contentContainerStyle={styles.scrollContent}
+                    style={[styles.scrollView, styles.invertedTransform]}
+                    showsVerticalScrollIndicator={false}
+                    nestedScrollEnabled={true}
+                  >
+                    <View style={styles.contentTransform}>
+                      {renderContent()}
+                    </View>
+                  </ScrollView>
+                </ScrollView>
+                <BottomView
+                  key={Math.random()}
+                  goBack={goBack}
+                  onSave={onSave}
+                  data={data}
+                  isShowBack={isShowBack}
+                  isTyping={false}
+                  cardTranslateX={null}
+                  style={{
+                    paddingHorizontal: 20,
+                    paddingVertical: 30,
+                    paddingTop: 0,
+                  }}
+                />
+              </View>
             ) : (
               <View style={{ flex: 1 }}>
                 <View
@@ -235,7 +260,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
                     paddingHorizontal: 50,
                   }}
                 >
-                  <ChatIcon style={{ marginTop: 70, marginBottom: 15 }} />
+                  <ChatIcon style={{ marginTop: 100, marginBottom: 15 }} />
                   <Text style={styles.emptyTitle} allowFontScaling={false}>
                     Keep the streak 🚀
                   </Text>
@@ -244,26 +269,20 @@ const JournalCard: React.FC<JournalCardProps> = ({
                     you know when they’re ready to be saved.
                   </Text>
                 </View>
-                <View
-                  key="save-button"
-                  style={{
-                    alignItems: "center",
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignSelf: "flex-start",
-                    padding: 15,
-                  }}
-                >
-                  {isShowBack ? <GoBackButton onPress={goBack} /> : <View />}
-                  {data?.length > 0 ? (
-                    <SaveJournalButton onPress={onSave} />
-                  ) : (
-                    <View />
-                  )}
-                </View>
+                <BottomView
+                  key={Math.random()}
+                  goBack={goBack}
+                  onSave={onSave}
+                  data={data}
+                  isShowBack={isShowBack}
+                  isTyping={false}
+                  cardTranslateX={null}
+                  style={{ paddingHorizontal: 20, paddingVertical: 30 }}
+                />
               </View>
             )}
           </ImageBackground>
+          {data?.length > 0 ? <DatePill date={formattedDate} /> : null}
         </Animated.View>
       </GestureDetector>
     </View>
@@ -280,13 +299,12 @@ const styles = StyleSheet.create({
   },
   card: {
     flex: 1,
-    borderRadius: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 5,
-    overflow: "hidden",
+    borderRadius: 24,
+    shadowColor: "#100212E5",
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 7,
     backgroundColor: COLORS.cardBackground,
     marginVertical: 20,
   },
@@ -301,7 +319,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingVertical: 30,
+    paddingTop: 0,
     flexGrow: 1,
     justifyContent: "flex-start",
   },
@@ -310,15 +328,17 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     paddingHorizontal: 15,
     paddingVertical: 5,
-    borderRadius: 7,
-    marginBottom: 20,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: "rgba(0, 0, 0, 0.07)",
     position: "absolute",
-    top: 5,
-    zIndex: 99,
-    elevation: 20,
+    top: -15,
     transform: [{ rotate: "-3deg" }],
+    shadowColor: "#100212E5",
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 10,
   },
   datePillText: {
     fontSize: 14,
@@ -374,6 +394,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "Regular",
     marginTop: 10,
+  },
+  bottomViewStyle: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 15,
   },
 });
 

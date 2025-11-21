@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { SharedValue } from "react-native-reanimated";
 
 export type JournalItem = {
@@ -19,10 +21,17 @@ export interface JournalCardProps {
   title?: string;
   isShowBack?: boolean;
   goBack: () => void;
+  style?: ViewStyle;
 }
 
 export interface JournalInputProps {
   currentText: string;
   onTextChange: (text: string) => void;
   onSend: () => void;
+}
+
+export interface GradientTextProps {
+  children: ReactNode;
+  colors: [string, string, ...string[]];
+  style?: StyleProp<TextStyle>;
 }

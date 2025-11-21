@@ -15,7 +15,7 @@ import { COLORS } from "../constants/Colors";
 const DOT_SIZE = 8;
 const ANIMATION_DURATION = 400;
 
-const Dot: React.FC<{ delay: number }> = ({ delay }) => {
+const Dot: React.FC<{ delay: number; color: string }> = ({ delay, color }) => {
   const offsetY = useSharedValue(0);
 
   React.useEffect(() => {
@@ -44,7 +44,11 @@ const Dot: React.FC<{ delay: number }> = ({ delay }) => {
     };
   });
 
-  return <Animated.View style={[styles.dot, animatedStyle]} />;
+  return (
+    <Animated.View
+      style={[styles.dot, { backgroundColor: color }, animatedStyle]}
+    />
+  );
 };
 
 const TypingIndicator: React.FC = () => {
@@ -62,9 +66,9 @@ const TypingIndicator: React.FC = () => {
       style={styles.typingBubble}
     >
       <View style={styles.dotContainer}>
-        <Dot delay={0} />
-        <Dot delay={150} />
-        <Dot delay={300} />
+        <Dot delay={0} color="rgba(16, 2, 18, 0.13)" />
+        <Dot delay={150} color="rgba(16, 2, 18, 0.27)" />
+        <Dot delay={300} color="rgba(16, 2, 18, 0.55)" />
       </View>
     </LinearGradient>
   );
@@ -73,9 +77,8 @@ const TypingIndicator: React.FC = () => {
 const styles = StyleSheet.create({
   typingBubble: {
     alignSelf: "flex-start",
-    borderRadius: 25,
-    paddingHorizontal: 18,
-    paddingVertical: 12,
+    borderRadius: 20,
+    padding: 18,
     maxWidth: "50%",
     marginBottom: 15,
   },
@@ -90,7 +93,7 @@ const styles = StyleSheet.create({
     width: DOT_SIZE,
     height: DOT_SIZE,
     borderRadius: DOT_SIZE / 2,
-    backgroundColor: "white",
+    backgroundColor: "#1002128C",
     marginHorizontal: 2,
   },
 });

@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { Easing, useSharedValue, withTiming } from "react-native-reanimated";
 import { JournalItem } from "./src/types";
-import JournalCard, { DatePill } from "./src/components/JournalCard";
+import JournalCard from "./src/components/JournalCard";
 import JournalInput from "./src/components/JournalInput";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -168,7 +168,7 @@ const App = () => {
   return (
     <GestureHandlerRootView style={styles.fullScreenBackground}>
       <ImageBackground
-        source={require("./assets/gradient.png")}
+        source={require("./assets/Gradient.png")}
         style={styles.fullScreenBackground}
       >
         <SafeAreaProvider>
@@ -188,9 +188,6 @@ const App = () => {
                 isShowBack={showPreviousCard}
                 goBack={handleGoBack}
               />
-              {journalData?.length > 0 ? (
-                <DatePill date={formattedDate} />
-              ) : null}
               <JournalInput
                 currentText={inputText}
                 onTextChange={setInputText}
