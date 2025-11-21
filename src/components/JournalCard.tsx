@@ -22,7 +22,7 @@ import Animated, {
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaskedView from "@react-native-masked-view/masked-view";
-import ChatIcon from "../../assets/ChatIcon";
+import ChatIcon from "../../assets/chatIcon";
 import moment from "moment";
 
 export const SaveJournalButton: React.FC<{ onPress: () => void }> = ({
