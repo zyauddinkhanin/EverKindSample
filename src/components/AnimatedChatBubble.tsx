@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
@@ -13,11 +13,28 @@ import { ChatBubbleProps } from "../types";
 const AnimatedChatBubble = ({ text, isAI, delay }: ChatBubbleProps) => {
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(30);
+  const [displayed, setDisplayed] = useState(isAI ? "" : text);
 
   useEffect(() => {
     opacity.value = withDelay(delay, withTiming(1, { duration: 350 }));
     translateY.value = withDelay(delay, withTiming(0, { duration: 350 }));
-  }, [delay, opacity, translateY]);
+  }, []);
+
+  useEffect(() => {
+    if (!isAI) return;
+
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i <= text.length) {
+        setDisplayed(text.slice(0, i));
+        i++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 20);
+
+    return () => clearInterval(interval);
+  }, [text]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -48,13 +65,13 @@ const AnimatedChatBubble = ({ text, isAI, delay }: ChatBubbleProps) => {
           style={styles.gradientBubble}
         >
           <Text style={styles.aiBubbleText} allowFontScaling={false}>
-            {text}
+            {displayed}
           </Text>
         </LinearGradient>
       ) : (
         <View style={styles.userBubbleContainer}>
           <Text style={styles.userBubbleText} allowFontScaling={false}>
-            {text}
+            {displayed}
           </Text>
         </View>
       )}
@@ -83,7 +100,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 24,
     paddingVertical: 18,
-    maxWidth: "100%",
+    width: "100%",
     shadowColor: "#100212E5",
   },
   aiBubbleText: {
@@ -94,7 +111,7 @@ const styles = StyleSheet.create({
   },
   userBubbleContainer: {
     paddingVertical: 8,
-    maxWidth: "100%",
+    width: "100%",
   },
   userBubbleText: {
     fontSize: 14,
